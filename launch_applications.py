@@ -48,7 +48,7 @@ def show_applications():
         },
         "3": {
             "name": "🎮 Voice Game",
-            "description": "Generate game dialogue (Coming Soon)",
+            "description": "Generate game dialogue with multiple characters",
             "module": "applications.voice_game.run",
             "function": "main"
         },
@@ -60,7 +60,7 @@ def show_applications():
         },
         "5": {
             "name": "🧪 Quick Test",
-            "description": "Run a quick CSM test",
+            "description": "Run a quick CSM test with benchmarking",
             "module": "applications.quick_test",
             "function": "main"
         }
@@ -98,18 +98,39 @@ def run_application(choice: str, apps: Dict):
         func()
         
     except ModuleNotFoundError as e:
-        print(f"❌ Application not yet implemented: {app['name']}")
-        print(f"   Module '{module_name}' not found")
-        if "voice_game" in module_name:
-            print("   🔧 Voice Game is coming soon!")
-        elif "config" in module_name:
-            print("   🔧 Configuration system is coming soon!")
+        print(f"❌ Module not found: {module_name}")
+        print(f"   Error: {e}")
+        print("💡 Make sure all application files are present")
     except Exception as e:
         print(f"❌ Error running {app['name']}: {e}")
         print("💡 Make sure you have:")
         print("   - Sufficient GPU memory")
         print("   - Hugging Face access (run 'huggingface-cli login')")
         print("   - Required dependencies installed")
+        print("   - Internet connection for downloading models/prompts")
+
+def show_help():
+    """Show help information"""
+    print("\n❓ Help Information")
+    print("-" * 40)
+    print("📋 Applications Overview:")
+    print("  🎭 Character Chat: Create AI personas with unique voices")
+    print("  📚 Story Generator: Turn text into narrated audio stories")
+    print("  🎮 Voice Game: Generate game dialogue and scenarios")
+    print("  🔧 Configuration: Adjust audio quality, device settings")
+    print("  🧪 Quick Test: Verify everything works properly")
+    print()
+    print("🔧 Setup Requirements:")
+    print("  1. Install dependencies: pip install -r requirements.txt")
+    print("  2. Login to Hugging Face: huggingface-cli login")
+    print("  3. Ensure you have access to CSM-1B and Llama-3.2-1B")
+    print("  4. Have sufficient GPU memory (8GB+ recommended)")
+    print()
+    print("🎯 Tips:")
+    print("  • Start with Quick Test to verify your setup")
+    print("  • Use Configuration to optimize for your hardware")
+    print("  • Check outputs/ folder for generated audio files")
+    print("  • CPU mode works but will be much slower")
 
 def main():
     """Main launcher function"""
@@ -129,18 +150,23 @@ def main():
     while True:
         apps = show_applications()
         
-        print("💡 Enter 'q' to quit")
-        choice = input("\n🎯 Select an application (1-5): ").strip().lower()
+        print("💡 Commands:")
+        print("   'h' or 'help' - Show help information")
+        print("   'q' or 'quit' - Exit")
+        choice = input("\n🎯 Select an application (1-5) or command: ").strip().lower()
         
-        if choice == 'q' or choice == 'quit':
+        if choice in ['q', 'quit', 'exit']:
             print("\n👋 Goodbye!")
             break
-            
-        if choice in apps:
+        elif choice in ['h', 'help']:
+            show_help()
+            input("\n⏸️  Press Enter to continue...")
+        elif choice in apps:
             run_application(choice, apps)
             input("\n⏸️  Press Enter to continue...")
         else:
             print(f"❌ Invalid choice: {choice}")
+            print("💡 Enter a number (1-5), 'help', or 'quit'")
 
 if __name__ == "__main__":
     main() 

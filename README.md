@@ -8,194 +8,218 @@
 
 CSM (Conversational Speech Model) is a speech generation model from [Sesame](https://www.sesame.com) that generates RVQ audio codes from text and audio inputs. The model architecture employs a [Llama](https://www.llama.com/) backbone and a smaller audio decoder that produces [Mimi](https://huggingface.co/kyutai/mimi) audio codes.
 
-A fine-tuned variant of CSM powers the [interactive voice demo](https://www.sesame.com/voicedemo) shown in our [blog post](https://www.sesame.com/research/crossing_the_uncanny_valley_of_voice).
+A fine-tuned variant of CSM powers the [interactive voice demo](https://www.sesame.com/voice) on the Sesame website.
 
-A hosted [Hugging Face space](https://huggingface.co/spaces/sesame/csm-1b) is also available for testing audio generation.
+## 🚀 Applications Framework
 
-## Requirements
+This repository now includes a comprehensive applications framework with ready-to-use CSM applications:
 
-* A CUDA-compatible GPU
-* The code has been tested on CUDA 12.4 and 12.6, but it may also work on other versions
-* Similarly, Python 3.10 is recommended, but newer versions may be fine
-* For some audio operations, `ffmpeg` may be required
-* Access to the following Hugging Face models:
-  * [Llama-3.2-1B](https://huggingface.co/meta-llama/Llama-3.2-1B)
-  * [CSM-1B](https://huggingface.co/sesame/csm-1b)
+### 📋 Available Applications
 
-### Setup
+| Application | Description | Features |
+|-------------|-------------|----------|
+| 🎭 **Character Chat** | Create AI characters with consistent voices | Multi-character conversations, personality persistence |
+| 📚 **Story Generator** | Convert stories to audio narration | Chapter-based generation, multiple narrator styles |
+| 🎮 **Voice Game** | Generate game dialogue | Combat scenarios, story interactions, custom dialogue |
+| 🔧 **Configuration** | Manage application settings | Audio quality, device preferences, output options |
+| 🧪 **Quick Test** | Test CSM functionality | Dependency checks, performance benchmarking |
+
+### 🏁 Quick Start
 
 ```bash
-git clone git@github.com:SesameAILabs/csm.git
-cd csm
-python3.10 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+# 1. Clone this repository
+git clone https://github.com/your-username/sesame-csm.git
+cd sesame-csm
 
-# Disable lazy compilation in Mimi
-export NO_TORCH_COMPILE=1
+# 2. Run setup (checks dependencies, creates directories)
+python setup_applications.py
 
-# You will need access to CSM-1B and Llama-3.2-1B
+# 3. Login to Hugging Face (required for model access)
 huggingface-cli login
+
+# 4. Launch the applications
+python launch_applications.py
 ```
 
-### Windows Setup
-
-The `triton` package cannot be installed in Windows. Instead use `pip install triton-windows`.
-
-## Quickstart
-
-This script will generate a conversation between 2 characters, using a prompt for each character.
+### 💡 Usage Examples
 
 ```bash
-python run_csm.py
-```
+# Interactive launcher (recommended)
+python launch_applications.py
 
-## 🆕 Applications Framework (Fork Enhancement)
-
-This fork includes a collection of practical applications built on top of CSM, making it easier to create real-world projects with conversational speech generation.
-
-### Available Applications
-
-#### 🎭 Character Chat
-Create conversational AI characters with consistent voices and personalities.
-```bash
+# Run specific applications directly
 python -m applications.character_chat.run
-```
-
-#### 📚 Story Generator  
-Convert written stories into engaging audio narration.
-```bash
 python -m applications.story_generator.run
-```
-
-#### 🎮 Voice Game (Coming Soon)
-Generate dynamic game dialogue with multiple distinct characters.
-```bash
 python -m applications.voice_game.run
+
+# Test your setup
+python -m applications.quick_test
 ```
 
-### Quick Start with Applications
+## 📖 Original CSM Usage
+
+### Quick start
+
+Install the repository dependencies by running:
 
 ```bash
-# Run any application
-python -m applications.character_chat.run
-
-# All generated audio files are saved to outputs/
-ls outputs/
+pip install -r requirements.txt
 ```
 
-**📖 For detailed application documentation, see [applications/README.md](applications/README.md)**
+Set the `NO_TORCH_COMPILE` environment variable to disable torchcompile:
 
-### What Makes This Fork Different
+```bash
+export NO_TORCH_COMPILE=1
+```
 
-- **Ready-to-use applications** instead of just the core model
-- **Shared utilities** for common tasks (audio processing, prompt management)
-- **Multiple examples** showing practical use cases
-- **Clean organization** for building new applications
-
----
-
-## Usage
-
-If you want to write your own applications with CSM, the following examples show basic usage.
-
-#### Generate a sentence
-
-This will use a random speaker identity, as no prompt or context is provided.
+Load the CSM-1B model and generate audio:
 
 ```python
 from generator import load_csm_1b
-import torchaudio
-import torch
 
-if torch.backends.mps.is_available():
-    device = "mps"
-elif torch.cuda.is_available():
-    device = "cuda"
-else:
-    device = "cpu"
+# Load the model
+generator = load_csm_1b()
 
-generator = load_csm_1b(device=device)
-
+# Generate audio from text
 audio = generator.generate(
-    text="Hello from Sesame.",
+    text="Hello, this is a test of the CSM model.",
     speaker=0,
     context=[],
     max_audio_length_ms=10_000,
 )
 
-torchaudio.save("audio.wav", audio.unsqueeze(0).cpu(), generator.sample_rate)
+# Save the audio
+import torchaudio
+torchaudio.save("output.wav", audio.unsqueeze(0), generator.sample_rate)
 ```
 
-#### Generate with context
+### Detailed usage
 
-CSM sounds best when provided with context. You can prompt or provide context to the model using a `Segment` for each speaker's utterance.
+CSM takes as input:
+- `text`: the text to synthesize to speech.
+- `speaker`: the speaker ID.
+- `context`: a list of `Segment` objects representing the conversation context.
+- `max_audio_length_ms`: the maximum duration of the generated audio, in milliseconds.
 
-NOTE: The following example is instructional and the audio files do not exist. It is intended as an example for using context with CSM.
+It returns a tensor representing the generated audio.
 
 ```python
-from generator import Segment
+from generator import load_csm_1b, Segment
 
-speakers = [0, 1, 0, 0]
-transcripts = [
-    "Hey how are you doing.",
-    "Pretty good, pretty good.",
-    "I'm great.",
-    "So happy to be speaking to you.",
-]
-audio_paths = [
-    "utterance_0.wav",
-    "utterance_1.wav",
-    "utterance_2.wav",
-    "utterance_3.wav",
-]
+# Load the model
+generator = load_csm_1b()
 
-def load_audio(audio_path):
-    audio_tensor, sample_rate = torchaudio.load(audio_path)
-    audio_tensor = torchaudio.functional.resample(
-        audio_tensor.squeeze(0), orig_freq=sample_rate, new_freq=generator.sample_rate
+# Create context segments (optional)
+context = [
+    Segment(
+        text="Hello, how are you today?",
+        speaker=0,
+        audio=some_audio_tensor
     )
-    return audio_tensor
-
-segments = [
-    Segment(text=transcript, speaker=speaker, audio=load_audio(audio_path))
-    for transcript, speaker, audio_path in zip(transcripts, speakers, audio_paths)
 ]
-audio = generator.generate(
-    text="Me too, this is some cool stuff huh?",
-    speaker=1,
-    context=segments,
-    max_audio_length_ms=10_000,
-)
 
-torchaudio.save("audio.wav", audio.unsqueeze(0).cpu(), generator.sample_rate)
+# Generate response
+audio = generator.generate(
+    text="I'm doing great, thank you for asking!",
+    speaker=1,
+    context=context,
+    max_audio_length_ms=15_000,
+)
 ```
 
-## FAQ
+#### Using prompt audios
 
-**Does this model come with any voices?**
+You can use prompts that have been recorded as audio. CSM works best when using consistent prompts across a conversation. Here's an example:
 
-The model open-sourced here is a base generation model. It is capable of producing a variety of voices, but it has not been fine-tuned on any specific voice.
+```python
+from generator import load_csm_1b, Segment
+import torchaudio
 
-**Can I converse with the model?**
+# Load model
+generator = load_csm_1b()
 
-CSM is trained to be an audio generation model and not a general-purpose multimodal LLM. It cannot generate text. We suggest using a separate LLM for text generation.
+# Load prompt audio
+prompt_audio, sample_rate = torchaudio.load("prompt.wav")
+prompt_audio = prompt_audio.squeeze(0)
 
-**Does it support other languages?**
+# Resample if necessary
+if sample_rate != generator.sample_rate:
+    prompt_audio = torchaudio.functional.resample(
+        prompt_audio, 
+        orig_freq=sample_rate, 
+        new_freq=generator.sample_rate
+    )
 
-The model has some capacity for non-English languages due to data contamination in the training data, but it likely won't do well.
+# Create prompt segment
+prompt = Segment(
+    text="Your prompt text here",
+    speaker=0,
+    audio=prompt_audio
+)
 
-## Misuse and abuse ⚠️
+# Generate with prompt context
+audio = generator.generate(
+    text="Response text to generate",
+    speaker=0,
+    context=[prompt],
+    max_audio_length_ms=10_000,
+)
+```
 
-This project provides a high-quality speech generation model for research and educational purposes. While we encourage responsible and ethical use, we **explicitly prohibit** the following:
+### Environment variables
 
-- **Impersonation or Fraud**: Do not use this model to generate speech that mimics real individuals without their explicit consent.
-- **Misinformation or Deception**: Do not use this model to create deceptive or misleading content, such as fake news or fraudulent calls.
-- **Illegal or Harmful Activities**: Do not use this model for any illegal, harmful, or malicious purposes.
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NO_TORCH_COMPILE` | Disables torch.compile | `False` |
+| `FORCE_CPU` | Forces CPU usage even if CUDA is available | `False` |
 
-By using this model, you agree to comply with all applicable laws and ethical guidelines. We are **not responsible** for any misuse, and we strongly condemn unethical applications of this technology.
+## 🔧 Requirements
 
----
+- Python 3.10+
+- PyTorch 2.0+
+- CUDA-compatible GPU (recommended, 8GB+ VRAM)
+- Hugging Face account with access to:
+  - [Llama-3.2-1B](https://huggingface.co/meta-llama/Llama-3.2-1B)
+  - [CSM-1B](https://huggingface.co/sesame/csm-1b)
 
-## Authors
-Johan Schalkwyk, Ankit Kumar, Dan Lyth, Sefik Emre Eskimez, Zack Hodari, Cinjon Resnick, Ramon Sanabria, Raven Jiang, and the Sesame team.
+## 📁 Project Structure
+
+```
+sesame-csm/
+├── applications/           # Application framework
+│   ├── character_chat/     # Character conversation app
+│   ├── story_generator/    # Story narration app
+│   ├── voice_game/         # Game dialogue app
+│   ├── config/             # Configuration system
+│   ├── shared_utils/       # Common utilities
+│   └── README.md           # Applications documentation
+├── launch_applications.py  # Main launcher
+├── setup_applications.py   # Setup script
+├── generator.py            # Core CSM generator
+├── models.py               # Model definitions
+├── watermarking.py         # Audio watermarking
+└── outputs/                # Generated audio files
+```
+
+## 📄 License
+
+This project is licensed under the same terms as the original CSM repository. See the [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. Areas where contributions would be especially helpful:
+
+- New application ideas
+- Performance optimizations
+- Additional prompt management features
+- Documentation improvements
+
+## 🐛 Troubleshooting
+
+**Memory Issues**: Use the configuration system to reduce audio quality or switch to CPU mode.
+
+**Model Download Issues**: Ensure you're logged into Hugging Face and have access to the required models.
+
+**Slow Generation**: Check that you're using GPU acceleration and consider adjusting quality settings.
+
+For more help, run the Quick Test application to diagnose common issues.

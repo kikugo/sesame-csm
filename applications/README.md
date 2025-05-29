@@ -21,6 +21,17 @@ Create game dialogue with multiple characters.
 - **Location**: `voice_game/`
 - **Usage**: `python -m applications.voice_game.run`
 - **Description**: Generate dynamic game dialogue with multiple distinct character voices
+- **Features**: Combat scenarios, story interactions, custom dialogue builder
+
+### 🚀 Main Launcher
+Interactive launcher for all applications.
+- **Usage**: `python launch_applications.py`
+- **Description**: Easy-to-use menu system for selecting and running applications
+
+### 🧪 Quick Test
+Test CSM functionality and performance.
+- **Usage**: `python -m applications.quick_test`
+- **Description**: Comprehensive testing suite with benchmarking capabilities
 
 ## Shared Utilities
 
@@ -44,7 +55,10 @@ export NO_TORCH_COMPILE=1
 # Login to Hugging Face (required for model access)
 huggingface-cli login
 
-# Run any application
+# Run the main launcher for easy access
+python launch_applications.py
+
+# Or run any application directly
 python -m applications.character_chat.run
 ```
 
@@ -68,6 +82,7 @@ To add a new application:
 2. Add your application code
 3. Use the shared utilities from `shared_utils/`
 4. Update this README with your application info
+5. Add your application to the main launcher
 
 ## Note
 

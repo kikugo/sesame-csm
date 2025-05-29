@@ -50,6 +50,51 @@ This script will generate a conversation between 2 characters, using a prompt fo
 python run_csm.py
 ```
 
+## 🆕 Applications Framework (Fork Enhancement)
+
+This fork includes a collection of practical applications built on top of CSM, making it easier to create real-world projects with conversational speech generation.
+
+### Available Applications
+
+#### 🎭 Character Chat
+Create conversational AI characters with consistent voices and personalities.
+```bash
+python -m applications.character_chat.run
+```
+
+#### 📚 Story Generator  
+Convert written stories into engaging audio narration.
+```bash
+python -m applications.story_generator.run
+```
+
+#### 🎮 Voice Game (Coming Soon)
+Generate dynamic game dialogue with multiple distinct characters.
+```bash
+python -m applications.voice_game.run
+```
+
+### Quick Start with Applications
+
+```bash
+# Run any application
+python -m applications.character_chat.run
+
+# All generated audio files are saved to outputs/
+ls outputs/
+```
+
+**📖 For detailed application documentation, see [applications/README.md](applications/README.md)**
+
+### What Makes This Fork Different
+
+- **Ready-to-use applications** instead of just the core model
+- **Shared utilities** for common tasks (audio processing, prompt management)
+- **Multiple examples** showing practical use cases
+- **Clean organization** for building new applications
+
+---
+
 ## Usage
 
 If you want to write your own applications with CSM, the following examples show basic usage.
